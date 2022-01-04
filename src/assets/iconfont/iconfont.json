@@ -1,0 +1,23 @@
+{
+  "id": "3115422",
+  "name": "h-idea-v",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "vue组件库图标",
+  "glyphs": [
+    {
+      "icon_id": "891275",
+      "name": "删除",
+      "font_class": "shanchu",
+      "unicode": "e6f0",
+      "unicode_decimal": 59120
+    },
+    {
+      "icon_id": "26535255",
+      "name": "修改",
+      "font_class": "xiugai",
+      "unicode": "e626",
+      "unicode_decimal": 58918
+    }
+  ]
+}

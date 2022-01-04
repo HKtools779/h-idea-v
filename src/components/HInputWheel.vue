@@ -1,10 +1,9 @@
 <template>
   <div
     class="h-input-wheel"
-    :class="{ 'inChangeModel': inChangeModel }"
-    v-clickoutside="handleCancle"
-    v-mousewheel="handleWheel"
-    :_preventWheel="inChangeModel"
+    :class="{ 'inChangeModel': inChangeModel, 'inEidt': inEdit }"
+    v-clickoutside="handleOutSideClick"
+    v-mousewheel:[inChangeModel]="handleWheel"
     @click="handleClick"
   >
     <div
@@ -14,11 +13,23 @@
       :item-index="index"
       :key="index"
     >{{ item }}</div>
+    <i
+      class="iconfont"
+      :class="{ 'icon-xiugai': !inEdit, 'icon-shanchu': inEdit }"
+      @click.stop="handleIconClick"
+    ></i>
+    <input
+      v-foucs="inEdit"
+      class="h_input_edit"
+      type="text"
+      :value="inputEidtString"
+      @input="handleEditInput"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 const props = defineProps({
   modelValue: Number,
   addIntegerZero: {
@@ -44,6 +55,17 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 
+let inputEidtString = ref('');
+const handleEditInput = (e: InputEvent) => {
+  const value = e.target.value;
+  if (isNaN(Number(value))) {
+    e.target.value = inputEidtString.value;
+  } else {
+      inputEidtString.value = ''
+      inputEidtString.value = value.trim();
+  }
+}
+
 const chartArr = computed(() => {
   const towPart = String(props.modelValue).split('.');
   let integerArr = towPart[0].split(''),
@@ -64,11 +86,12 @@ const chartArr = computed(() => {
     res.push('0');
   }
   res.push(...integerArr);
-  res.push('.')
+  res.push('.');
   res.push(...decimalArr);
   for (let i = 0; i < zeroDecimalCount; i++) {
     res.push('0');
   }
+  inputEidtString.value = res.join('');
   return res;
 })
 
@@ -78,8 +101,23 @@ const handleClick = () => {
     inChangeModel.value = true;
   }
 }
-const handleCancle = () => {
+
+const inEdit = ref(false);
+const handleIconClick = () => {
+  if (!inEdit.value) {
+    inEdit.value = true;
+    inChangeModel.value = false;
+  } else {
+    inputEidtString.value = '';
+  }
+}
+
+const handleOutSideClick = () => {
   inChangeModel.value = false;
+  if (inEdit.value) {
+    inEdit.value = false;
+    emit('update:modelValue', Number(inputEidtString.value));
+  }
 }
 
 const rawHandleWheel = (e: any) => {
@@ -110,12 +148,15 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
 
 <style scoped>
 .h-input-wheel {
+  position: relative;
+  display: flex;
+  align-items: center;
   border: #dddddd 2px solid;
   background-color: white;
   border-radius: 8px;
-  padding: 12px 14px;
-  display: flex;
+  padding: 0 8px;
   transition: border-color 0.2s;
+  color: #444444;
 }
 .h-input-wheel:hover {
   border-color: #bbbbbb;
@@ -127,7 +168,7 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #444;
+  font-size: 20px;
 }
 .isNumber {
   width: 17px;
@@ -137,5 +178,43 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
 .inChangeModel .isNumber:hover {
   background-color: #409eff;
   color: white;
+}
+
+.h-input-wheel.inEidt .h-input-wheel-item {
+  visibility: hidden;
+}
+
+.h_input_edit {
+  position: absolute;
+  right: 36px;
+  width: calc(100% - 44px);
+  margin: 0;
+  border: 0;
+  padding: 0;
+  color: #444444;
+  outline: 0;
+  line-height: 1;
+  letter-spacing: 5px;
+  visibility: hidden;
+  font-size: 20px;
+}
+.h-input-wheel.inEidt .h_input_edit {
+  visibility: visible;
+}
+
+.iconfont {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 22px;
+  margin-left: 5px;
+  transition: color 0.2s;
+  text-align: center;
+}
+.iconfont:hover {
+  color: #409eff;
+}
+.icon-shanchu {
+  font-size: 18px;
 }
 </style>
