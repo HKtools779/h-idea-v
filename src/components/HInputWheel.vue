@@ -22,8 +22,9 @@
       v-foucs="inEdit"
       class="h_input_edit"
       type="text"
-      :value="inputEidtString"
+      :value="inputEditString"
       @input="handleEditInput"
+      ref="inputElement"
     />
   </div>
 </template>
@@ -55,19 +56,41 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 
-let inputEidtString = ref('');
+let inputEditString = ref(''),
+  backupString = ref('');
+
 const handleEditInput = (e: InputEvent) => {
   const value = e.target.value;
   if (isNaN(Number(value))) {
-    e.target.value = inputEidtString.value;
+    e.target.value = inputEditString.value;
   } else {
-      inputEidtString.value = ''
-      inputEidtString.value = value.trim();
+    inputEditString.value = '';
+    inputEditString.value = value.trim();
   }
 }
 
 const chartArr = computed(() => {
-  const towPart = String(props.modelValue).split('.');
+  let modelString = '';
+  const rawModelString = String(props.modelValue);
+  if (rawModelString.includes('e')) {
+    const sciArr = rawModelString.split('e'),
+      frontArr = sciArr[0].split('.');
+    let decimalLength = 0
+    if (frontArr.length === 2) {
+      decimalLength = frontArr[1].length;
+    }
+    if (sciArr[1][0] === '-') {
+      modelString = Number(props.modelValue).toFixed(Number(sciArr[1].slice(1)) + decimalLength);
+    } else {
+      modelString = frontArr.join('');
+      for (let i = 0; i < (Number(sciArr[1].slice(1)) - decimalLength); i++) {
+        modelString += '0';
+      }
+    }
+  } else {
+    modelString = rawModelString;
+  }
+  const towPart = modelString.split('.');
   let integerArr = towPart[0].split(''),
     decimalArr: string[] = [];
   if (towPart.length === 2) {
@@ -91,7 +114,7 @@ const chartArr = computed(() => {
   for (let i = 0; i < zeroDecimalCount; i++) {
     res.push('0');
   }
-  inputEidtString.value = res.join('');
+  inputEditString.value = res.join('');
   return res;
 })
 
@@ -108,7 +131,8 @@ const handleIconClick = () => {
     inEdit.value = true;
     inChangeModel.value = false;
   } else {
-    inputEidtString.value = '';
+    backupString.value = inputEditString.value;
+    inputEditString.value = '';
   }
 }
 
@@ -116,7 +140,7 @@ const handleOutSideClick = () => {
   inChangeModel.value = false;
   if (inEdit.value) {
     inEdit.value = false;
-    emit('update:modelValue', Number(inputEidtString.value));
+    emit('update:modelValue', Number(inputEditString.value));
   }
 }
 
@@ -151,7 +175,9 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
   position: relative;
   display: flex;
   align-items: center;
-  border: #dddddd 2px solid;
+  box-sizing: border-box;
+  outline: #dddddd 2px solid;
+  outline-offset: -2px;
   background-color: white;
   border-radius: 8px;
   padding: 0 8px;
@@ -188,13 +214,13 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
   position: absolute;
   right: 36px;
   width: calc(100% - 44px);
+  height: calc(100% - 4px);
   margin: 0;
   border: 0;
   padding: 0;
-  color: #444444;
   outline: 0;
-  line-height: 1;
   letter-spacing: 5px;
+  color: #444444;
   visibility: hidden;
   font-size: 20px;
 }
