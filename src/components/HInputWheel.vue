@@ -19,7 +19,7 @@
       @click.stop="handleIconClick"
     ></i>
     <input
-      v-foucs="inEdit"
+      v-focus="inEdit"
       class="h_input_edit"
       type="text"
       :value="inputEditString"
@@ -185,10 +185,10 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
   color: #444444;
 }
 .h-input-wheel:hover {
-  border-color: #bbbbbb;
+  outline-color: #bbbbbb;
 }
 .h-input-wheel.inChangeModel {
-  border-color: #409eff;
+  outline-color: #409eff;
 }
 .h-input-wheel-item {
   display: flex;
@@ -213,13 +213,13 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
 .h_input_edit {
   position: absolute;
   right: 36px;
-  width: calc(100% - 44px);
+  width: calc(100% - 46px);
   height: calc(100% - 4px);
   margin: 0;
   border: 0;
-  padding: 0;
+  padding: 0 0 0 2px;
   outline: 0;
-  letter-spacing: 5px;
+  letter-spacing: 4px;
   color: #444444;
   visibility: hidden;
   font-size: 20px;

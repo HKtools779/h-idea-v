@@ -5,7 +5,7 @@
       <HInputWheel
         :addIntegerZero="true"
         :addDecimalZero="true"
-        :integerMinLength="8"
+        :integerMinLength="5"
         v-model="dataOfWheel"
       />
     </div>

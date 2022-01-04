@@ -1,6 +1,6 @@
 import type { ObjectDirective, DirectiveBinding } from 'vue'
 
-const Foucs: ObjectDirective = {
+const Focus: ObjectDirective = {
   mounted(el: HTMLElement, binding: DirectiveBinding) {
     if(binding.value){
       el.focus();
@@ -13,4 +13,4 @@ const Foucs: ObjectDirective = {
   }
 }
 
-export default Foucs
+export default Focus
