@@ -64,6 +64,7 @@ const dataOfWheel = ref(3.1415926);
   margin-bottom: 10px;
 }
 .inner {
+  overflow: hidden;
   padding: 20px 30px;
   background-color: lightgoldenrodyellow;
   display: flex;
