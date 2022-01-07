@@ -1,13 +1,25 @@
 <template>
   <div class="item">
     <div class="title">title！！！中文！</div>
-    <div class="inner">
+    <div class="inner" style="position: relative; height: 600px;">
       <HInputWheel
         :addIntegerZero="true"
         :addDecimalZero="true"
         :integerMinLength="5"
         v-model="dataOfWheel"
-      />
+        @intoWheelMode="intoWheelMode"
+        @outWheelMode="outWheelMode"
+        @intoEditMode="intoEditMode"
+        @editInput="editInput"
+        @outEditMode="outEditMode"
+        @clearAll="clearAll"
+      >
+        <template #default="slotObj">
+          <div style="position: absolute; width: 100%; top: 100%; background-color: burlywood;">
+            <div v-for="(key ,index) in Object.keys(slotObj)">{{ key }}:{{ slotObj[key] }}</div>
+          </div>
+        </template>
+      </HInputWheel>
     </div>
   </div>
   <div class="item">
@@ -25,7 +37,9 @@
   <div class="item">
     <div class="title">title！！！中文！</div>
     <div class="inner" style="position: relative; height: 200px;">
-      <div style="position: absolute;width: 220px; height: 220px;background-color: thistle; z-index: 99;"></div>
+      <div
+        style="position: absolute;width: 220px; height: 220px;background-color: thistle; z-index: 99;"
+      ></div>
       <div
         style="position: absolute; box-sizing: border-box; height: 200px; width: 200px;background-color: yellowgreen; z-index: 100;"
       >
@@ -47,6 +61,26 @@
 import { ref } from 'vue';
 import HInputWheel from '../components/HInputWheel.vue';
 const dataOfWheel = ref(3.1415926);
+
+const intoWheelMode = function (e) {
+  console.log('intoWheelMode', e)
+}
+const outWheelMode = function (e) {
+  console.log('outWheelMode', e)
+}
+const intoEditMode = function (e) {
+  console.log('intoEditMode', e)
+}
+const editInput = function (e) {
+  console.log('editInput', e)
+}
+const outEditMode = function (e) {
+  console.log('outEditMode', e)
+}
+const clearAll = function (e) {
+  console.log('clearAll', e)
+}
+
 </script>
 
 <style scoped>

@@ -1,9 +1,9 @@
 <template>
   <div
     class="h-input-wheel"
-    :class="{ 'inChangeModel': inChangeModel, 'inEidt': inEdit }"
+    :class="{ 'inWheelMode': inWheelMode, 'inEidt': inEdit }"
     v-clickoutside="handleOutSideClick"
-    v-mousewheel:[inChangeModel]="handleWheel"
+    v-mousewheel:[inWheelMode]="handleWheel"
     @click="handleClick"
   >
     <div
@@ -23,9 +23,21 @@
       class="h_input_edit"
       type="text"
       :value="inputEditString"
-      @input="handleEditInput"
+      @input.stop="handleEditInput"
       ref="inputElement"
     />
+    <slot
+      :inWheelMode="inWheelMode"
+      :inEdit="inEdit"
+      :inputEditString="inputEditString"
+      :chartArr="chartArr"
+      :addIntegerZero="addIntegerZero"
+      :addDecimalZero="addDecimalZero"
+      :integerMinLength="integerMinLength"
+      :decimalMinLength="decimalMinLength"
+      :delay="delay"
+      :modelValue="modelValue"
+    ></slot>
   </div>
 </template>
 
@@ -54,11 +66,9 @@ const props = defineProps({
     default: 50
   }
 });
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'intoWheelMode', 'outWheelMode', 'intoEditMode', 'editInput', 'outEditMode', 'clearAll']);
 
-let inputEditString = ref(''),
-  backupString = ref('');
-
+let inputEditString = ref('');
 const handleEditInput = (e: InputEvent) => {
   const value = e.target.value;
   if (isNaN(Number(value))) {
@@ -66,6 +76,7 @@ const handleEditInput = (e: InputEvent) => {
   } else {
     inputEditString.value = '';
     inputEditString.value = value.trim();
+    emit('editInput', inputEditString.value)
   }
 }
 
@@ -118,35 +129,45 @@ const chartArr = computed(() => {
   return res;
 })
 
-const inChangeModel = ref(false);
+const inEdit = ref(false);
+
+const inWheelMode = ref(false);
 const handleClick = () => {
-  if (!inChangeModel.value) {
-    inChangeModel.value = true;
+  if (!inWheelMode.value && !inEdit.value) {
+    inWheelMode.value = true;
+    emit('intoWheelMode', inputEditString.value);
   }
 }
 
-const inEdit = ref(false);
 const handleIconClick = () => {
+  if (inWheelMode.value) {
+    inWheelMode.value = false;
+    emit('outWheelMode', inputEditString.value);
+  }
   if (!inEdit.value) {
     inEdit.value = true;
-    inChangeModel.value = false;
+    emit('intoEditMode', inputEditString.value);
   } else {
-    backupString.value = inputEditString.value;
+    emit('clearAll', inputEditString.value);
     inputEditString.value = '';
   }
 }
 
 const handleOutSideClick = () => {
-  inChangeModel.value = false;
+  if (inWheelMode.value) {
+    inWheelMode.value = false;
+    emit('outWheelMode', inputEditString.value);
+  }
   if (inEdit.value) {
     inEdit.value = false;
     emit('update:modelValue', Number(inputEditString.value));
+    emit('outEditMode', inputEditString.value);
   }
 }
 
 const rawHandleWheel = (e: any) => {
   e.preventDefault && e.preventDefault();
-  if (e.target.className.split(' ').includes('isNumber') && inChangeModel.value) {
+  if (e.target.className.split(' ').includes('isNumber') && inWheelMode.value) {
     const index = e.target.attributes.getNamedItem('item-index').value;
     const newchartArr = [...chartArr.value];
     const currentNumber = newchartArr[index];
@@ -187,7 +208,10 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
 .h-input-wheel:hover {
   outline-color: #bbbbbb;
 }
-.h-input-wheel.inChangeModel {
+.h-input-wheel.inWheelMode {
+  outline-color: #409eff;
+}
+.h-input-wheel.inEidt {
   outline-color: #409eff;
 }
 .h-input-wheel-item {
@@ -201,7 +225,7 @@ const handleWheel = throttle(rawHandleWheel, props.delay);
   height: 40px;
   transition: background-color 0.4s;
 }
-.inChangeModel .isNumber:hover {
+.inWheelMode .isNumber:hover {
   background-color: #409eff;
   color: white;
 }
